@@ -12,11 +12,7 @@ export class TransactionService extends BaseService {
 
     if (!transaction.accountId) this.addError('Account must be informed');
 
-    const currentState = this.getCurrentState();
-    if (currentState != ServiceState.Invalid)
-      this.setCurrentState(ServiceState.Valid);
-
-    return this.getCurrentState() == ServiceState.Valid;
+    return super.validateResult();
   }
 
   async createNewTransaction(value: number, accountId: string): Promise<BaseEntity | null> {
