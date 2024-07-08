@@ -1,5 +1,5 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import { getMongoDBURL } from '../environment';
+import { getMongoDBURL } from '@app/environment';
 
 const enum DBEvents {
   error = 'error',

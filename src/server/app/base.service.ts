@@ -1,5 +1,5 @@
 import { Model } from "mongoose";
-import { BaseEntity } from "./base.entity";
+import { BaseEntity } from "@app/base.entity";
 
 export interface BaseReaderService {
   getAll(): Promise<BaseEntity[]>;

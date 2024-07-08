@@ -10,7 +10,7 @@ import {
 import { FindAllTransactionsGQLType,
   FindByIdTransactionGQLType,
   CreateTransactionGQLType
-} from '../transactions/transaction.graphql';
+} from '@transactions/transaction.graphql';
 
 const QueryGQLType = new GraphQLObjectType({
   name: 'Queries',

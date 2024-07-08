@@ -11,7 +11,18 @@
     "strict": true,
     "skipLibCheck": true,
     "outDir": "dist",
+    "baseUrl": "./",
+    "rootDir": "./app",
     "sourceMap": true,
-    "lib": ["ES2022"]
+    "lib": ["ES2022"],
+    "paths": {
+      "@database/*": ["app/database/*"],
+      "@app/*": ["app/*"],
+      "@gql/*": ["app/graph-ql/*"],
+      "@transactions/*": ["app/transactions/*"]
+    },
+    "plugins": [{
+      "transform": "typescript-transform-paths"
+    }]
   }
 }

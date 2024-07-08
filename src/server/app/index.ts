@@ -1,11 +1,12 @@
 import dotenv from 'dotenv';
 import http from 'http';
-import { getDefaultPort } from './app/environment';
-import app from './app/app';
-import { databaseConnection } from './app/database/mongo.database';
+import { getDefaultPort } from '@app/environment';
+import app from '@app/app';
+import { databaseConnection } from '@database/mongo.database';
 
 async function main () {
   dotenv.config({ path: '.env' });
+
   const port = getDefaultPort();
 
   await databaseConnection();

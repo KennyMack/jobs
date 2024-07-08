@@ -1,5 +1,5 @@
-import { BaseEntity } from '../base.entity';
-import { createDBModel, DBCollections } from '../database/mongo.database';
+import { BaseEntity } from '@app/base.entity';
+import { createDBModel, DBCollections } from '@database/mongo.database';
 
 export interface Transaction extends BaseEntity {
   version: number,

@@ -1,6 +1,6 @@
-import { BaseEntity } from "../base.entity";
-import { BaseService, ServiceState } from "../base.service";
-import { TransactionEntity, Transaction } from './transaction.entity';
+import { BaseEntity } from "@app/base.entity";
+import { BaseService, ServiceState } from "@app/base.service";
+import { TransactionEntity, Transaction } from '@transactions/transaction.entity';
 
 export class TransactionService extends BaseService {
   constructor() {

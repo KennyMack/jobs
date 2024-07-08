@@ -8,10 +8,10 @@ import {
   GraphQLFloat,
   GraphQLFieldConfig
 } from 'graphql';
-import { GraphQLTypesName } from '../graph-ql/graphql';
-import { Transaction } from './transaction.entity';
-import { TransactionService } from './transaction.service';
-import { ServiceState } from '../base.service';
+import { GraphQLTypesName } from '@gql/graphql';
+import { Transaction } from '@transactions/transaction.entity';
+import { TransactionService } from '@transactions/transaction.service';
+import { ServiceState } from '@app/base.service';
 
 export const TransactionGQLType = new GraphQLObjectType<Transaction>({
   name: GraphQLTypesName.Transaction,

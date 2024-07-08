@@ -3,7 +3,7 @@ import logger from 'koa-logger';
 import Router from 'koa-router';
 import mount from 'koa-mount';
 import { createHandler } from 'graphql-http/lib/use/koa';
-import { schema } from './graph-ql/schema';
+import { schema } from '@gql/schema';
 
 const app = new Koa();
 const routes = new Router();
