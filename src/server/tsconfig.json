@@ -19,7 +19,9 @@
       "@database/*": ["app/database/*"],
       "@app/*": ["app/*"],
       "@gql/*": ["app/graph-ql/*"],
-      "@transactions/*": ["app/transactions/*"]
+      "@transactions/*": ["app/transactions/*"],
+      "@users/*": ["app/users/*"],
+      "@accounts/*": ["app/accounts/*"]
     },
     "plugins": [{
       "transform": "typescript-transform-paths"
