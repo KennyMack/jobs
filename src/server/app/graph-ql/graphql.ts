@@ -1,3 +1,5 @@
 export const enum GraphQLTypesName {
-  Transaction = 'Transaction'
+  Transaction = 'Transaction',
+  User = 'User',
+  Account = 'Account'
 }
