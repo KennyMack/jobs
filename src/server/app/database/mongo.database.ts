@@ -12,7 +12,9 @@ const enum DBEvents {
 }
 
 export const enum DBCollections {
-  Transactions = 'transactions'
+  Transactions = 'transactions',
+  Accounts = 'accounts',
+  Users = 'users'
 }
 
 export async function databaseConnection() {
@@ -40,7 +42,12 @@ export async function databaseConnection() {
 export function createDBModel<TModelType>(
   collectionName: DBCollections,
   schemaDefinition: object): Model<TModelType> {
-  const schema = new Schema(schemaDefinition);
+  const schema = new Schema(schemaDefinition, {
+    timestamps: {
+      createdAt: 'createdAt',
+      updatedAt: 'updatedAt'
+    }
+  });
 
   return mongoose.model<TModelType>(
     collectionName,
