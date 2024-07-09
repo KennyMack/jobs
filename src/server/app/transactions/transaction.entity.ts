@@ -1,22 +1,38 @@
+import { Account } from '@accounts/account.entity';
 import { BaseEntity } from '@app/base.entity';
+import { User } from '@users/user.entity';
 import { createDBModel, DBCollections } from '@database/mongo.database';
+import { Types } from 'mongoose';
 
 export interface Transaction extends BaseEntity {
-  version: number,
-  accountId: string,
+  operationId: string,
+  userId: User,
+  senderId: Account,
+  receiverId: Account,
   value: number,
-  completed: boolean,
-  finalizedAt?: Date
+  transactionDate: Date,
+  hashData: string
 }
 
 export const TransactionEntity = createDBModel<Transaction>(DBCollections.Transactions, {
-  version: {
-    type: Number,
-    required: true,
-    default: 1
-  },
-  accountId: {
+  operationId: {
     type: String,
+    required: true,
+    unique: true,
+  },
+  userId: {
+    type: Types.ObjectId,
+    ref: DBCollections.Users,
+    required: true
+  },
+  senderId: {
+    type: Types.ObjectId,
+    ref: DBCollections.Accounts,
+    required: true
+  },
+  receiverId: {
+    type: Types.ObjectId,
+    ref: DBCollections.Accounts,
     required: true
   },
   value: {
@@ -24,13 +40,13 @@ export const TransactionEntity = createDBModel<Transaction>(DBCollections.Transa
     required: true,
     default: 0
   },
-  completed: {
-    type: Boolean,
-    required: true,
-    default: false,
-  },
-  finalizedAt: {
+  transactionDate: {
     type: Date,
-    default: null
+    required: true,
+    default: Date.now
+  },
+  hashData: {
+    type: String,
+    required: true
   }
 });

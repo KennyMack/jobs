@@ -120,6 +120,22 @@ export class AccountService extends BaseService {
     }
   }
 
+  async updateAccountBalance(account: Account) : Promise<boolean> {
+    const result = await AccountEntity.updateOne({
+      _id: account._id,
+      version: account.version
+    }, {
+      $set: {
+        balance: account.balance,
+        version: ++account.version
+      }
+    }, {
+      upsert: false,
+    }).session(this.currentSession || null);
+
+    return (result.modifiedCount || 0) > 0;
+  }
+
   override async getAll(): Promise<BaseEntity[]> {
     return await AccountEntity.find({}).populate('userId');
   }

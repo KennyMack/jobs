@@ -19,6 +19,7 @@
       "@database/*": ["app/database/*"],
       "@app/*": ["app/*"],
       "@gql/*": ["app/graph-ql/*"],
+      "@utils/*": ["app/utils/*"],
       "@transactions/*": ["app/transactions/*"],
       "@users/*": ["app/users/*"],
       "@accounts/*": ["app/accounts/*"]
