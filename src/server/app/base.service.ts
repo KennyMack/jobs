@@ -1,4 +1,4 @@
-import { Model } from "mongoose";
+import { ClientSession, Document, Model } from "mongoose";
 import { BaseEntity } from "@app/base.entity";
 
 export interface BaseReaderService {
@@ -23,6 +23,16 @@ export interface StateService {
   validateResult(): boolean;
 }
 
+export interface SessionService {
+  externalSession: boolean;
+  setSession(session: ClientSession): void;
+  clearSession(): void;
+  startTransaction(entity: Model<any>): Promise<void>;
+  commitTransaction(): Promise<void> ;
+  abortTransaction(): Promise<void> ;
+  endSession(): Promise<void>;
+}
+
 export const enum ServiceState {
   Undefined = -1,
   Invalid = 0,
@@ -30,12 +40,49 @@ export const enum ServiceState {
 }
 
 export abstract class BaseService  implements
+  SessionService,
   StateService,
   BaseReaderService,
   BaseWriterService {
   constructor(protected entity: Model<any>) { }
   currentState: ServiceState = ServiceState.Undefined;
   messages: string[] = [];
+  currentSession?: ClientSession | null = null;
+  externalSession: boolean = false;
+
+  setSession(session: ClientSession): void {
+    this.externalSession = true;
+    this.currentSession = session;
+  }
+
+  clearSession(): void {
+    this.externalSession = false;
+    this.currentSession = null;
+  }
+
+  async startTransaction(entity: Model<any>): Promise<void> {
+    if (this.externalSession || this.currentSession) return;
+
+    this.currentSession = await entity.startSession();
+
+    this.currentSession.startTransaction();
+  }
+
+  async commitTransaction(): Promise<void> {
+    if (this.externalSession || !this.currentSession) return;
+    await this.currentSession.commitTransaction();
+  }
+
+  async abortTransaction(): Promise<void> {
+    if (this.externalSession || !this.currentSession) return;
+    this.currentSession.abortTransaction();
+  }
+
+  async endSession() : Promise<void> {
+    if (this.externalSession || !this.currentSession) return;
+    await this.currentSession.endSession();
+    this.currentSession = null;
+  }
 
   getCurrentState(): ServiceState {
     return this.currentState;
