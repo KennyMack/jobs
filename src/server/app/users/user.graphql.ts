@@ -5,7 +5,6 @@ import {
   GraphQLID,
   GraphQLObjectType,
   GraphQLString,
-  GraphQLFloat,
   GraphQLFieldConfig
 } from 'graphql';
 import { GraphQLTypesName } from '@gql/graphql';
@@ -18,19 +17,19 @@ export const UserGQLType = new GraphQLObjectType<User>({
   fields: () => ({
     _id: {
       type: GraphQLString,
-      resolve: (transaction) => transaction._id
+      resolve: (user) => user._id
     },
     fullName: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: (transaction) => transaction.fullName
+      resolve: (user) => user.fullName
     },
     birthYear: {
       type: new GraphQLNonNull(GraphQLInt),
-      resolve: (transaction) => transaction.birthYear
+      resolve: (user) => user.birthYear
     },
     taxId: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: (transaction) => transaction.taxId
+      resolve: (user) => user.taxId
     }
   })
 })
@@ -66,7 +65,7 @@ export const FindAllUsersGQLType: GraphQLFieldConfig<
       type: GraphQLInt
     }
   },
-  resolve: async (_, args) => {
+  resolve: async () => {
     const service = new UserService();
     return await service.getAll();
   }
@@ -76,28 +75,42 @@ type CreateUserDTO = {
   fullName: string,
   taxId: string,
   birthYear: number,
-  password: string
+  password: string,
+  bankCode: string,
+  bankName: string,
 }
 
 export const CreateUserGQLType: GraphQLFieldConfig<
-  any, any, any
+  object, object
 > = {
   type: UserGQLType,
-  description: 'Create a new user',
+  description: 'Create a new user and optionally a bank account.',
   args: {
     fullName: { type: new GraphQLNonNull(GraphQLString) },
     taxId: { type: new GraphQLNonNull(GraphQLString) },
     birthYear: { type: new GraphQLNonNull(GraphQLInt) },
     password: { type: new GraphQLNonNull(GraphQLString) },
+    bankCode: { type: GraphQLString },
+    bankName: { type: GraphQLString },
   },
-  resolve: async (_, dto: CreateUserDTO) => {
+  resolve: async (_, dto) => {
+    const {
+      fullName,
+      taxId,
+      birthYear,
+      password,
+      bankCode,
+      bankName
+    } = dto as CreateUserDTO;
     const service = new UserService();
 
     const result = await service.createNewUser(
-      dto.fullName,
-      dto.taxId,
-      dto.birthYear,
-      dto.password
+      fullName,
+      taxId,
+      birthYear,
+      password,
+      bankCode,
+      bankName
     );
 
     if (service.getCurrentState() == ServiceState.Invalid) throw new Error(

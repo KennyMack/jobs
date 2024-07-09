@@ -1,10 +1,10 @@
-import { ClientSession, Document, Model } from "mongoose";
+import { ClientSession, Model } from "mongoose";
 import { BaseEntity } from "@app/base.entity";
 
 export interface BaseReaderService {
   getAll(): Promise<BaseEntity[]>;
   getById(id: string): Promise<BaseEntity | null>;
-  Query(filter: {}): Promise<BaseEntity[]>;
+  Query(filter: object): Promise<BaseEntity[]>;
 }
 
 export interface BaseWriterService {
@@ -27,7 +27,7 @@ export interface SessionService {
   externalSession: boolean;
   setSession(session: ClientSession): void;
   clearSession(): void;
-  startTransaction(entity: Model<any>): Promise<void>;
+  startTransaction(entity: Model<BaseEntity>): Promise<void>;
   commitTransaction(): Promise<void> ;
   abortTransaction(): Promise<void> ;
   endSession(): Promise<void>;
@@ -44,7 +44,7 @@ export abstract class BaseService  implements
   StateService,
   BaseReaderService,
   BaseWriterService {
-  constructor(protected entity: Model<any>) { }
+  constructor(protected entity: Model<BaseEntity>) { }
   currentState: ServiceState = ServiceState.Undefined;
   messages: string[] = [];
   currentSession?: ClientSession | null = null;
@@ -60,7 +60,7 @@ export abstract class BaseService  implements
     this.currentSession = null;
   }
 
-  async startTransaction(entity: Model<any>): Promise<void> {
+  async startTransaction(entity: Model<BaseEntity>): Promise<void> {
     if (this.externalSession || this.currentSession) return;
 
     this.currentSession = await entity.startSession();
@@ -155,7 +155,7 @@ export abstract class BaseService  implements
     return await this.entity.findById(id);
   }
 
-  async Query(filter: {}): Promise<BaseEntity[]> {
+  async Query(filter: object): Promise<BaseEntity[]> {
     return await this.entity.find(filter);
   }
 }

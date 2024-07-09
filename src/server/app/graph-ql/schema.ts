@@ -1,10 +1,5 @@
 import {
-  GraphQLInt,
-  GraphQLList,
-  GraphQLNonNull,
   GraphQLObjectType,
-  GraphQLString,
-  GraphQLFloat,
   GraphQLSchema
 } from 'graphql';
 import {

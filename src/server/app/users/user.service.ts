@@ -1,5 +1,6 @@
+import { AccountService } from "@app/accounts/account.service";
 import { BaseEntity } from "@app/base.entity";
-import { BaseService } from "@app/base.service";
+import { BaseService, ServiceState } from "@app/base.service";
 import { UserEntity, User } from '@users/user.entity';
 import * as bcrypt from 'bcrypt';
 
@@ -22,47 +23,69 @@ export class UserService extends BaseService {
   async getByTaxId(taxId: string): Promise<User | null> {
     const found = await this.entity.find({
       taxId
-    })
+    }).session(this.currentSession || null)
 
     return found?.length > 0 ? found[0] : null;
   }
 
-  async createNewUser(fullName: string, taxId: string, birthYear: number, password: string): Promise<BaseEntity | null> {
+  async createNewUser(
+    fullName: string,
+    taxId: string,
+    birthYear: number,
+    password: string,
+    bankCode?: string,
+    bankName?: string
+  ): Promise<BaseEntity | null> {
     super.resetState();
-    const session = await UserEntity.startSession();
-    session.startTransaction();
+    super.startTransaction(UserEntity);
     try {
-      const transactionCreate = new UserEntity({
+      const userCreate = new UserEntity({
         fullName, taxId, birthYear, password
       });
 
-      if (!this.validate(transactionCreate)) {
-        session.abortTransaction();
+      if (!this.validate(userCreate)) {
+        await super.abortTransaction();
         return null;
       }
 
       const existsTaxId = (await this.getByTaxId(taxId)) != null;
       if (existsTaxId) {
-        session.abortTransaction();
+        await super.abortTransaction();
         this.addError('TaxId already exists');
         return null;
       }
 
-      transactionCreate.salt = await bcrypt.genSalt(10);
-      transactionCreate.password = await bcrypt.hash(password, transactionCreate.salt);
+      userCreate.salt = await bcrypt.genSalt(10);
+      userCreate.password = await bcrypt.hash(password, userCreate.salt);
 
-      await transactionCreate.save({ session });
-      await session.commitTransaction();
+      await userCreate.save({ session: this.currentSession });
+
+      if (bankCode && bankName) {
+        const serviceAccount = new AccountService();
+        serviceAccount.setSession(this.currentSession!);
+
+        await serviceAccount.createNewAccount(userCreate._id.toString(), bankCode, bankName);
+        if (serviceAccount.getCurrentState() !== ServiceState.Valid) {
+          await super.abortTransaction();
+          this.messages = [
+            ...serviceAccount.messages
+          ];
+          this.setCurrentState(serviceAccount.getCurrentState());
+          return null;
+        }
+      }
+
+      await super.commitTransaction();
       super.addSuccess('Success on create');
-      return transactionCreate;
+      return userCreate;
     } catch (ex) {
-      session.abortTransaction();
+      await super.abortTransaction();
       console.error(ex);
       super.addError(`Failed on create: ${ex}`);
 
       return null;
     } finally {
-      session.endSession();
+      await super.endSession();
     }
   }
 }

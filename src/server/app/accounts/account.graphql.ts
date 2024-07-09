@@ -12,6 +12,7 @@ import { GraphQLTypesName } from '@gql/graphql';
 import { Account } from '@accounts/account.entity';
 import { AccountService } from '@accounts/account.service';
 import { ServiceState } from '@app/base.service';
+import { UserGQLType } from '@users/user.graphql';
 
 export const AccountGQLType = new GraphQLObjectType<Account>({
   name: GraphQLTypesName.Account,
@@ -26,7 +27,13 @@ export const AccountGQLType = new GraphQLObjectType<Account>({
     },
     userId: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: (transaction) => transaction.userId
+      resolve: (transaction) => transaction.userId._id
+    },
+    user: {
+      type: UserGQLType,
+      resolve: (account: Account) => {
+        return account.userId;
+      }
     },
     accountNumber: {
       type: new GraphQLNonNull(GraphQLString),
@@ -54,10 +61,10 @@ export const AccountGQLType = new GraphQLObjectType<Account>({
     },
     startDate: {
       type: new GraphQLNonNull(GraphQLString),
-      resolve: (transaction) => transaction.endDate
+      resolve: (transaction) => transaction.startDate
     },
     endDate: {
-      type: new GraphQLNonNull(GraphQLString),
+      type: GraphQLString,
       resolve: (transaction) => transaction.endDate
     }
   })
@@ -94,7 +101,7 @@ export const FindAllAccountsGQLType: GraphQLFieldConfig<
       type: GraphQLInt
     }
   },
-  resolve: async (_, args) => {
+  resolve: async () => {
     const service = new AccountService();
     return await service.getAll();
   }
@@ -107,7 +114,7 @@ type CreateAccountDTO = {
 }
 
 export const CreateAccountGQLType: GraphQLFieldConfig<
-  any, any, any
+  object, object
 > = {
   type: AccountGQLType,
   description: 'Create a new account',
@@ -116,12 +123,17 @@ export const CreateAccountGQLType: GraphQLFieldConfig<
     bankCode: { type: new GraphQLNonNull(GraphQLString) },
     bankName: { type: new GraphQLNonNull(GraphQLString) },
   },
-  resolve: async (_, dto: CreateAccountDTO) => {
+  resolve: async (_, dto) => {
+    const {
+      userId,
+      bankCode,
+      bankName
+    } = dto as CreateAccountDTO;
     const service = new AccountService();
     const result = await service.createNewAccount(
-      dto.userId,
-      dto.bankCode,
-      dto.bankName
+      userId,
+      bankCode,
+      bankName
     );
 
     if (service.getCurrentState() == ServiceState.Invalid) throw new Error(

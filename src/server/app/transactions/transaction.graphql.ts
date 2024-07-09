@@ -87,16 +87,20 @@ type CreateTransactionDTO = {
 }
 
 export const CreateTransactionGQLType: GraphQLFieldConfig<
-  any, any, any
+  object, object
 > = {
   type: TransactionGQLType,
   args: {
     value: { type: new GraphQLNonNull(GraphQLFloat) },
     accountId: { type: new GraphQLNonNull(GraphQLID) }
   },
-  resolve: async (_, dto: CreateTransactionDTO) => {
+  resolve: async (_, dto) => {
+    const {
+      value,
+      accountId
+    } = dto as CreateTransactionDTO;
     const service = new TransactionService();
-    const result = await service.createNewTransaction(dto.value, dto.accountId);
+    const result = await service.createNewTransaction(value, accountId);
 
     if (service.getCurrentState() == ServiceState.Invalid) throw new Error(
       service.getMessages().join(', ')

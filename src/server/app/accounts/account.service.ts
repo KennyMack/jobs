@@ -22,7 +22,7 @@ export class AccountService extends BaseService {
     const found = await this.entity.find({
       accountNumber,
       accountDigit
-    })
+    }).session(this.currentSession || null);
 
     return found?.length > 0 ? found[0] : null;
   }
@@ -63,15 +63,15 @@ export class AccountService extends BaseService {
     bankName: string
   ): Promise<BaseEntity | null> {
     super.resetState();
-    const session = await AccountEntity.startSession();
-    session.startTransaction();
+    super.startTransaction(AccountEntity);
+
     try {
       const user = await UserEntity
         .findOne({ _id: userId })
-        .session(session);
+        .session(this.currentSession || null);
 
       if (!user) {
-        session.abortTransaction();
+        await super.abortTransaction();
         this.addError('UserId is not valid');
         return null;
       }
@@ -95,28 +95,36 @@ export class AccountService extends BaseService {
         accountCreate.accountDigit)) != null;
 
       if (existsTaxId) {
-        session.abortTransaction();
+        await super.abortTransaction();
         this.addError('Account number already exists');
         return null;
       }
 
       if (!this.validate(accountCreate)) {
-        session.abortTransaction();
+        await super.abortTransaction();
         return null;
       }
 
-      await accountCreate.save({ session });
-      await session.commitTransaction();
+      await accountCreate.save({ session: this.currentSession });
+      await super.commitTransaction();
       super.addSuccess('Success on create');
       return accountCreate;
     } catch (ex) {
-      session.abortTransaction();
+      await super.abortTransaction();
       console.error(ex);
       super.addError(`Failed on create: ${ex}`);
 
       return null;
     } finally {
-      session.endSession();
+      await super.endSession();
     }
+  }
+
+  override async getAll(): Promise<BaseEntity[]> {
+    return await AccountEntity.find({}).populate('userId');
+  }
+
+  override async getById(id: string): Promise<BaseEntity | null> {
+    return await AccountEntity.findById(id).populate('userId');
   }
 }

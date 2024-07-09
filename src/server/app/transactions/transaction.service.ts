@@ -1,5 +1,5 @@
 import { BaseEntity } from "@app/base.entity";
-import { BaseService, ServiceState } from "@app/base.service";
+import { BaseService } from "@app/base.service";
 import { TransactionEntity, Transaction } from '@transactions/transaction.entity';
 
 export class TransactionService extends BaseService {
