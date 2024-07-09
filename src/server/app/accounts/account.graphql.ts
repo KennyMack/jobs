@@ -13,6 +13,7 @@ import { Account } from '@accounts/account.entity';
 import { AccountService } from '@accounts/account.service';
 import { ServiceState } from '@app/base.service';
 import { UserGQLType } from '@users/user.graphql';
+import { mutationWithClientMutationId } from 'graphql-relay';
 
 export const AccountGQLType = new GraphQLObjectType<Account>({
   name: GraphQLTypesName.Account,
@@ -113,22 +114,20 @@ type CreateAccountDTO = {
   bankName: string,
 }
 
-export const CreateAccountGQLType: GraphQLFieldConfig<
-  object, object
-> = {
-  type: AccountGQLType,
-  description: 'Create a new account',
-  args: {
+export const CreateAccountGQLMutation = mutationWithClientMutationId({
+  name: GraphQLTypesName.CreateAccount,
+  description: 'Creates a new account',
+  inputFields: {
     userId: { type: new GraphQLNonNull(GraphQLString) },
     bankCode: { type: new GraphQLNonNull(GraphQLString) },
     bankName: { type: new GraphQLNonNull(GraphQLString) },
   },
-  resolve: async (_, dto) => {
-    const {
-      userId,
-      bankCode,
-      bankName
-    } = dto as CreateAccountDTO;
+
+  mutateAndGetPayload: async ({
+    userId,
+    bankCode,
+    bankName
+  }: CreateAccountDTO) => {
     const service = new AccountService();
     const result = await service.createNewAccount(
       userId,
@@ -141,5 +140,12 @@ export const CreateAccountGQLType: GraphQLFieldConfig<
     )
 
     return result;
+  },
+
+  outputFields: {
+    account: {
+      type: AccountGQLType,
+      resolve: (account) => account
+    }
   }
-}
+});

@@ -9,6 +9,7 @@
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.5",
     "graphql-http": "^1.22.1",
+    "graphql-relay": "^0.10.1",
     "kcors": "^2.2.2",
     "koa": "^2.15.3",
     "koa-logger": "^3.2.1",

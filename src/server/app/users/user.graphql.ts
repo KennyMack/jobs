@@ -11,6 +11,7 @@ import { GraphQLTypesName } from '@gql/graphql';
 import { User } from '@users/user.entity';
 import { UserService } from '@users/user.service';
 import { ServiceState } from '@app/base.service';
+import { mutationWithClientMutationId } from 'graphql-relay';
 
 export const UserGQLType = new GraphQLObjectType<User>({
   name: GraphQLTypesName.User,
@@ -80,12 +81,10 @@ type CreateUserDTO = {
   bankName: string,
 }
 
-export const CreateUserGQLType: GraphQLFieldConfig<
-  object, object
-> = {
-  type: UserGQLType,
+export const CreateUserGQLMutation = mutationWithClientMutationId({
+  name: GraphQLTypesName.CreateUser,
   description: 'Create a new user and optionally a bank account.',
-  args: {
+  inputFields: {
     fullName: { type: new GraphQLNonNull(GraphQLString) },
     taxId: { type: new GraphQLNonNull(GraphQLString) },
     birthYear: { type: new GraphQLNonNull(GraphQLInt) },
@@ -93,15 +92,14 @@ export const CreateUserGQLType: GraphQLFieldConfig<
     bankCode: { type: GraphQLString },
     bankName: { type: GraphQLString },
   },
-  resolve: async (_, dto) => {
-    const {
-      fullName,
-      taxId,
-      birthYear,
-      password,
-      bankCode,
-      bankName
-    } = dto as CreateUserDTO;
+  mutateAndGetPayload: async ({
+    fullName,
+    taxId,
+    birthYear,
+    password,
+    bankCode,
+    bankName
+  }: CreateUserDTO) => {
     const service = new UserService();
 
     const result = await service.createNewUser(
@@ -118,5 +116,11 @@ export const CreateUserGQLType: GraphQLFieldConfig<
     )
 
     return result;
+  },
+  outputFields: {
+    user: {
+      type: UserGQLType,
+      resolve: (user) => user
+    }
   }
-}
+});

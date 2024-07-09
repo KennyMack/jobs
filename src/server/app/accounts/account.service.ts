@@ -1,7 +1,7 @@
 import { BaseEntity } from "@app/base.entity";
 import { BaseService } from "@app/base.service";
 import { AccountEntity, Account } from '@accounts/account.entity';
-import { UserEntity } from "@app/users/user.entity";
+import { UserEntity } from "@users/user.entity";
 
 export class AccountService extends BaseService {
   constructor() {
@@ -108,7 +108,7 @@ export class AccountService extends BaseService {
       await accountCreate.save({ session: this.currentSession });
       await super.commitTransaction();
       super.addSuccess('Success on create');
-      return accountCreate;
+      return await this.getById(accountCreate._id.toString());
     } catch (ex) {
       await super.abortTransaction();
       console.error(ex);

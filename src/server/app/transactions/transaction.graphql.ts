@@ -12,9 +12,9 @@ import { GraphQLTypesName } from '@gql/graphql';
 import { Transaction } from '@transactions/transaction.entity';
 import { TransactionService } from '@transactions/transaction.service';
 import { ServiceState } from '@app/base.service';
-import { generateNanoId } from '@app/utils/strings';
-import { UserGQLType } from '@app/users/user.graphql';
-import { AccountGQLType } from '@app/accounts/account.graphql';
+import { UserGQLType } from '@users/user.graphql';
+import { AccountGQLType } from '@accounts/account.graphql';
+import { mutationWithClientMutationId } from 'graphql-relay';
 
 export const TransactionGQLType = new GraphQLObjectType<Transaction>({
   name: GraphQLTypesName.Transaction,
@@ -117,24 +117,37 @@ type CreateTransactionDTO = {
   value: number
 }
 
-export const CreateTransactionGQLType: GraphQLFieldConfig<
-  object, object
-> = {
-  type: TransactionGQLType,
-  args: {
+export const CreateTransactionGQLMutation = mutationWithClientMutationId({
+  name: GraphQLTypesName.CreateTransaction,
+  description: 'Creates a new transaction',
+  inputFields: {
     userId: { type: new GraphQLNonNull(GraphQLString) },
     senderNumberAccount: { type: new GraphQLNonNull(GraphQLString) },
     receiverNumberAccount: { type: new GraphQLNonNull(GraphQLString) },
     value: { type: new GraphQLNonNull(GraphQLInt) }
   },
-  resolve: async (_, dto) => {
+
+  mutateAndGetPayload: async ({
+    userId, senderNumberAccount,
+    receiverNumberAccount, value
+  }: CreateTransactionDTO) => {
     const service = new TransactionService();
-    const result = await service.createNewTransaction(dto as CreateTransactionDTO);
+    const result = await service.createNewTransaction({
+      userId, senderNumberAccount,
+      receiverNumberAccount, value
+    });
 
     if (service.getCurrentState() == ServiceState.Invalid) throw new Error(
       service.getMessages().join(', ')
     )
 
     return result;
+  },
+
+  outputFields: {
+    transaction: {
+      type: TransactionGQLType,
+      resolve: (transaction) => transaction
+    }
   }
-}
+});

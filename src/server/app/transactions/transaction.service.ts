@@ -4,8 +4,7 @@ import { generateNanoId, hashData } from "@utils/strings";
 import { TransactionEntity, Transaction } from '@transactions/transaction.entity';
 import { UserEntity } from "@users/user.entity";
 import { Account, AccountEntity } from "@accounts/account.entity";
-import { AccountService } from "@app/accounts/account.service";
-import { DBCollections } from "@database/mongo.database";
+import { AccountService } from "@accounts/account.service";
 
 type TransactionCreateType = {
   userId: string,
@@ -134,7 +133,7 @@ export class TransactionService extends BaseService {
       await transactionCreate.save({ session: this.currentSession });
       await super.commitTransaction();
       super.addSuccess('Success on create');
-      return transactionCreate;
+      return await this.getById(transactionCreate._id.toString());
     } catch (ex) {
       super.abortTransaction();
       console.error(ex);
@@ -162,7 +161,7 @@ export class TransactionService extends BaseService {
           path: 'userId',
           model: 'users'
         }
-       })
+       }).session(this.currentSession || null)
 
   }
 
@@ -182,17 +181,6 @@ export class TransactionService extends BaseService {
           path: 'userId',
           model: 'users'
         }
-       })
+       }).session(this.currentSession || null)
   }
 }
-/*
-Project.find(query)
-  .populate({
-     path: 'pages',
-     populate: {
-       path: 'components',
-       model: 'Component'
-     }
-  })
-  .exec(function(err, docs) {});
-*/

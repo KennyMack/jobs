@@ -5,17 +5,17 @@ import {
 import {
   FindAllTransactionsGQLType,
   FindByIdTransactionGQLType,
-  CreateTransactionGQLType
+  CreateTransactionGQLMutation
 } from '@transactions/transaction.graphql';
 import {
   FindAllUsersGQLType,
   FindByIdUserGQLType,
-  CreateUserGQLType
+  CreateUserGQLMutation
 } from '@users/user.graphql';
 import {
   FindAllAccountsGQLType,
   FindByIdAccountGQLType,
-  CreateAccountGQLType
+  CreateAccountGQLMutation
 } from '@accounts/account.graphql';
 
 const QueryGQLType = new GraphQLObjectType({
@@ -48,13 +48,13 @@ const MutationGQLType = new GraphQLObjectType({
   description: 'Mutable operations available',
   fields: {
     createTransaction: {
-      ...CreateTransactionGQLType
+      ...CreateTransactionGQLMutation
     },
     createUser: {
-      ...CreateUserGQLType
+      ...CreateUserGQLMutation
     },
     createAccount: {
-      ...CreateAccountGQLType
+      ...CreateAccountGQLMutation
     }
   }
 })
