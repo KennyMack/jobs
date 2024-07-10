@@ -4,5 +4,15 @@ export const enum GraphQLTypesName {
   Account = 'Account',
   CreateTransaction = 'CreateTransaction',
   CreateAccount = 'CreateAccount',
-  CreateUser = 'CreateUser'
+  CreateUser = 'CreateUser',
+  Login = 'Login'
+}
+
+export function checkAuthentication(ctx: { user?: object }, operation: GraphQLTypesName) {
+  if (operation === GraphQLTypesName.Login ||
+    operation === GraphQLTypesName.CreateUser) return;
+
+  if (!ctx.user){
+    throw new Error('Unauthorized');
+  }
 }

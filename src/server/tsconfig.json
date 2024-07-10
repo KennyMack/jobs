@@ -22,7 +22,8 @@
       "@utils/*": ["app/utils/*"],
       "@transactions/*": ["app/transactions/*"],
       "@users/*": ["app/users/*"],
-      "@accounts/*": ["app/accounts/*"]
+      "@accounts/*": ["app/accounts/*"],
+      "@auth/*": ["app/auth/*"]
     },
     "plugins": [{
       "transform": "typescript-transform-paths"

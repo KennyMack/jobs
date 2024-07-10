@@ -39,14 +39,51 @@ export const enum ServiceState {
   Valid = 1
 }
 
-export abstract class BaseService  implements
+export abstract class BaseStateService implements StateService {
+  currentState: ServiceState = ServiceState.Undefined;
+  messages: string[] = [];
+  getCurrentState(): ServiceState {
+    return this.currentState;
+  }
+  setCurrentState(state: ServiceState): void {
+    this.currentState = state;
+  }
+  resetState(): void {
+    this.currentState = ServiceState.Undefined;
+    this.messages = [];
+  }
+  addError(error: string): void {
+    this.messages.push(error);
+    this.currentState = ServiceState.Invalid;
+  }
+  addSuccess(message: string): void {
+    this.messages.push(message);
+      this.currentState = this.currentState != ServiceState.Invalid ?
+        ServiceState.Valid : this.currentState;
+  }
+  getMessages(): string[] {
+    return this.messages;
+  }
+  validateResult(): boolean {
+    const currentState = this.getCurrentState();
+    if (currentState != ServiceState.Invalid)
+      this.setCurrentState(ServiceState.Valid);
+
+    return this.getCurrentState() == ServiceState.Valid;
+  }
+}
+
+export abstract class BaseService
+  extends
+  BaseStateService
+  implements
   SessionService,
   StateService,
   BaseReaderService,
   BaseWriterService {
-  constructor(protected entity: Model<any>) { }
-  currentState: ServiceState = ServiceState.Undefined;
-  messages: string[] = [];
+  constructor(protected entity: Model<any>) {
+    super();
+  }
   currentSession?: ClientSession | null = null;
   externalSession: boolean = false;
 
@@ -82,42 +119,6 @@ export abstract class BaseService  implements
     if (this.externalSession || !this.currentSession) return;
     await this.currentSession.endSession();
     this.currentSession = null;
-  }
-
-  getCurrentState(): ServiceState {
-    return this.currentState;
-  }
-
-  setCurrentState(state: ServiceState) {
-    this.currentState = state;
-  }
-
-  resetState(): void {
-    this.currentState = ServiceState.Undefined;
-    this.messages = [];
-  }
-
-  addError(error: string): void {
-    this.messages.push(error);
-    this.currentState = ServiceState.Invalid;
-  }
-
-  addSuccess(message: string): void {
-    this.messages.push(message);
-    this.currentState = this.currentState != ServiceState.Invalid ?
-      ServiceState.Valid : this.currentState;
-  }
-
-  validateResult(): boolean {
-    const currentState = this.getCurrentState();
-    if (currentState != ServiceState.Invalid)
-      this.setCurrentState(ServiceState.Valid);
-
-    return this.getCurrentState() == ServiceState.Valid;
-  }
-
-  getMessages(): string[] {
-    return this.messages;
   }
 
   async create(data: BaseEntity): Promise<BaseEntity> {

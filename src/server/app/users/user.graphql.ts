@@ -7,7 +7,7 @@ import {
   GraphQLString,
   GraphQLFieldConfig
 } from 'graphql';
-import { GraphQLTypesName } from '@gql/graphql';
+import { checkAuthentication, GraphQLTypesName } from '@gql/graphql';
 import { User } from '@users/user.entity';
 import { UserService } from '@users/user.service';
 import { ServiceState } from '@app/base.service';
@@ -47,7 +47,8 @@ export const FindByIdUserGQLType: GraphQLFieldConfig<
       type: new GraphQLNonNull(GraphQLID)
     }
   },
-  resolve: async (_, args) => {
+  resolve: async (_, args, ctx) => {
+    checkAuthentication(ctx, GraphQLTypesName.User);
     const service = new UserService();
     return await service.getById(args.id);
   }
@@ -66,7 +67,8 @@ export const FindAllUsersGQLType: GraphQLFieldConfig<
       type: GraphQLInt
     }
   },
-  resolve: async () => {
+  resolve: async (_, { limit, skip }, ctx) => {
+    checkAuthentication(ctx, GraphQLTypesName.User);
     const service = new UserService();
     return await service.getAll();
   }
@@ -99,7 +101,9 @@ export const CreateUserGQLMutation = mutationWithClientMutationId({
     password,
     bankCode,
     bankName
-  }: CreateUserDTO) => {
+  }: CreateUserDTO, ctx) => {
+    checkAuthentication(ctx, GraphQLTypesName.User);
+
     const service = new UserService();
 
     const result = await service.createNewUser(

@@ -17,6 +17,7 @@ import {
   FindByIdAccountGQLType,
   CreateAccountGQLMutation
 } from '@accounts/account.graphql';
+import { LoginGQLMutation } from '@auth/auth.graphql';
 
 const QueryGQLType = new GraphQLObjectType({
   name: 'Queries',
@@ -55,6 +56,9 @@ const MutationGQLType = new GraphQLObjectType({
     },
     createAccount: {
       ...CreateAccountGQLMutation
+    },
+    login: {
+      ...LoginGQLMutation
     }
   }
 })
