@@ -94,6 +94,12 @@ export class TransactionService extends BaseService {
         return null;
       }
 
+      if (senderAccount.userId.toString() !== user._id.toString()) {
+        await this.abortTransaction();
+        super.addError('Sender account don`t belongs to user');
+        return null;
+      }
+
       this.validateAccount('Sender', senderAccount);
       this.validateAccount('Receiver', receiverAccount);
       this.validateSenderBalance(senderAccount, transactionData.value);
